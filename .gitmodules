@@ -1,0 +1,3 @@
+[submodule "modules/libsqlitepp"]
+	path = modules/libsqlitepp
+	url = https://github.com/glycos/libsqlitepp.git
