@@ -37,13 +37,20 @@ namespace mvcpp{
                 return [&](std::shared_ptr<context> ctx){
                     ctx->render(view("static" + path));
                     ctx->response_header("Content-Type", "text/plain");
-                    if(path.substr(path.length() - 3, 3) == "css")
+                    std::map<std::string, std::string> mimetypes;
+                    mimetypes["css"] = "text/css";
+                    mimetypes["js"] = "text/js";
+                    mimetypes["jpg"] = "image/jpeg";
+                    mimetypes["jpeg"] = "image/jpeg";
+                    mimetypes["png"] = "image/png";
+                    mimetypes["gif"] = "image/gif";
+                    for(auto it: mimetypes)
                     {
-                        ctx->response_header("Content-Type", "text/css");
-                    }
-                    else if(path.substr(path.length() - 2, 2) == "js")
-                    {
-                        ctx->response_header("Content-Type", "text/javascript");
+                        if(path.substr(path.length() - it.first.size()) == it.first)
+                        {
+                            ctx->response_header("Content-Type", it.second);
+                            break;
+                        }
                     }
                 };
             }
