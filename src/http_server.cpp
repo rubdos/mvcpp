@@ -59,11 +59,12 @@ namespace mvcpp{
             }
             headers += std::string(buff, error);
         }
-        std::cout << "Request: " << std::endl << headers;
-        std::cout << std::string(headers, error) << std::endl;
 
         std::vector<std::string> header_lines;
         std::istringstream iss(headers);
+
+        std::cout << "Request: " << std::endl << headers;
+        std::cout << std::string(header_lines[0]) << std::endl;
 
         for(std::string token; std::getline(iss, token, '\n');)
         {
@@ -128,8 +129,6 @@ namespace mvcpp{
         std::stringstream ss;
         ss << version << " " << status << " " << explanation << "\r\n";
         ss << response;
-
-        std::cout << ss.str() << std::endl;
 
         send(socket, ss.str().c_str(), ss.str().size(), 0);
         close(socket);
