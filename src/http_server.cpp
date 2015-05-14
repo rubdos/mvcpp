@@ -63,16 +63,17 @@ namespace mvcpp{
         std::vector<std::string> header_lines;
         std::istringstream iss(headers);
 
-        std::cout << "Request: " << std::endl << headers;
-        std::cout << std::string(header_lines[0]) << std::endl;
-
         for(std::string token; std::getline(iss, token, '\n');)
         {
             header_lines.push_back(token.substr(0, token.size() - 1));
             // Chop of the \r without checking TODO
         }
+
         std::string requestline = header_lines[0];
         header_lines.erase(header_lines.begin());
+
+        std::cout << "Request: " << std::endl << headers;
+        std::cout << requestline << std::endl;
 
         iss.str(requestline);
         iss.clear();
