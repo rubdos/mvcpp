@@ -28,11 +28,11 @@ void test_controller::register_routes(mvcpp::router& r)
 
 void test_controller::index(mvcpp::context::ptr ctx)
 {
-    ctx->render("Welcome on my website!");
+    mvcpp::view& templ = ctx->get_template();
     auto t = ctx->get_view("test");
     auto tm = time(NULL);
     t["TIJD"] = std::string(asctime(localtime(&tm)));
-    ctx->render(t);
+    templ.subview("SUBVIEW") = t;
 }
 
 int main()

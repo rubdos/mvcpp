@@ -45,6 +45,9 @@ namespace mvcpp{
         void set_response_code(int rc) { _response_code = rc;}
 
         view get_view(const std::string& name);
+
+        void set_template(view v);
+        view& get_template();
     private:
         const std::string _path;
         const std::string _method;
@@ -55,6 +58,7 @@ namespace mvcpp{
 
         std::map<std::string, std::string> _response_headers;
         std::string _contents;
+        view _template;
         int _response_code;
     };
 }

@@ -37,5 +37,6 @@ class test_application : public mvcpp::application
 public:
     test_application() : application(8080){
         register_controller<test_controller>();
+        set_default_template("template");
     }
 };

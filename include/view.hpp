@@ -24,9 +24,13 @@ namespace mvcpp{
     {
         friend class context;
     public:
+        view();
         view(const std::string& path);
 
+        void load(const std::string& path);
+
         std::string& operator[] (const std::string& key);
+        view& subview (const std::string& key);
 
     private:
         std::string render() const;

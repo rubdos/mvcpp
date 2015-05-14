@@ -31,12 +31,14 @@ namespace mvcpp{
         void index_views();
         void load_view(std::string path);
 
+
     protected:
         template <class T>
         void register_controller()
         {
             _router.register_controller<T>();
         }
+        void set_default_template(std::string name){_default_template = name;}
 
     private:
         int _handle_request(const std::string path, 
@@ -46,5 +48,7 @@ namespace mvcpp{
         http_server _http_server;
         router _router;
         std::map<std::string /*view*/, std::string /*viewpath*/> _views;
+
+        std::string _default_template;
     };
 }

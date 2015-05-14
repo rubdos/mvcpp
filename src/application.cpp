@@ -38,7 +38,9 @@ namespace mvcpp{
     {
         auto controller_function = _router.route(method, path);
         std::stringstream resp;
+        // Create request context
         auto rc = std::make_shared<context>(path, method, headers, _views, resp);
+        rc->set_template(rc->get_view(_default_template));
         controller_function(rc);
         rc->compile();
         response = resp.str(); //"<h1>Hello world</h1> You requested path " + path;

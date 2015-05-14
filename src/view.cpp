@@ -15,12 +15,21 @@
   *  If not, see <http://www.gnu.org/licenses/>.
   */
   
+#include <iostream>
 #include <fstream>
 
 #include "view.hpp"
 
 namespace mvcpp{
+    view::view()
+    {
+        _contents = "INVALID VIEW";
+    }
     view::view(const std::string& path)
+    {
+        load(path);
+    }
+    void view::load(const std::string& path)
     {
         std::ifstream f (path);
         if(! f)
@@ -33,6 +42,7 @@ namespace mvcpp{
         _contents = ss.str();
         f.close();
     }
+
     std::string view::render() const
     {
         std::string result = _contents;
@@ -63,5 +73,9 @@ namespace mvcpp{
     std::string& view::operator[] (const std::string& key)
     {
         return _parameters[key];
+    }
+    view& view::subview (const std::string& key)
+    {
+        return _subviews[key];
     }
 }

@@ -24,8 +24,9 @@ namespace mvcpp{
         const std::vector<std::string>& request_headers, 
         const std::map<std::string, std::string>& views,
         std::stringstream& response)
-        : _path(path), _method(method), _request_headers(request_headers), _response_code(200),
-          _response_stream(response), _views(views)
+        : _path(path), _method(method), _request_headers(request_headers),
+          _views(views), _response_stream(response), 
+          _template(), _response_code(200)
     {
         _response_headers["Content-Type"] = "text/html"; // Default to text/html
     }
@@ -38,6 +39,10 @@ namespace mvcpp{
     void context::compile()
     {
         _response_stream.str(""); 
+        if(_contents.size() == 0)
+        {
+            _contents = _template.render();
+        }
         std::ostringstream ss;
         ss << _contents.size();
         _response_headers["Content-Length"] = ss.str();
@@ -59,5 +64,13 @@ namespace mvcpp{
         {
             return view("");
         }
+    }
+    void context::set_template(view v)
+    {
+        _template=v;
+    }
+    view& context::get_template()
+    {
+        return _template;
     }
 }
