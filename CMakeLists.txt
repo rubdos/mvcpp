@@ -23,3 +23,5 @@ include_directories(include)
 
 add_subdirectory(src)
 add_subdirectory(tests)
+
+file(COPY tests/testapplication/views DESTINATION ${CMAKE_BINARY_DIR}/tests/testapplication)
