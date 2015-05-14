@@ -94,7 +94,7 @@ namespace mvcpp{
                         {
                             dir = file;
                             std::cout << "Recursing " << dir << std::endl;
-                            return scan_dir(dir);
+                            scan_dir(dir);
                         }
                     }
                 }
@@ -141,7 +141,7 @@ namespace mvcpp{
                         {
                             dir = file;
                             std::cout << "Recursing " << dir << std::endl;
-                            return scan_dir(dir);
+                            scan_dir(dir);
                         }
                     }
                 }
