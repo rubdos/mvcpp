@@ -32,6 +32,12 @@ namespace mvcpp{
         {
             _routes["GET"][path] = m;
         }
+        template <class T>
+        void operator() (const std::string& path, void (T::* f) (std::shared_ptr<context>) )
+        {
+            using namespace std::placeholders;
+            (*this)(path, std::bind(f, T::instance(), _1));
+        }
         controller_method route(std::string method, std::string path);
 
         template <class T>

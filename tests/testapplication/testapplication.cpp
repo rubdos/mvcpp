@@ -23,7 +23,7 @@
 void test_controller::register_routes(mvcpp::router& r)
 {
     using namespace std::placeholders;
-    r("/", std::bind(&test_controller::index, this, _1));
+    r("/", &test_controller::index);
 }
 
 void test_controller::index(mvcpp::context::ptr ctx)
