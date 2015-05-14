@@ -18,7 +18,6 @@
 #include <iostream>
 #include <sstream>
 #include <dirent.h>
-#include <sys/stat.h>
 
 #include "application.hpp"
 #include "context.hpp"
@@ -63,7 +62,7 @@ namespace mvcpp{
     }
     void application::index_static()
     {
-        std::function<void (std::string)> scan_dir = [&](std::string dir)
+        std::function<void (std::string)> scan_dir = [this, &scan_dir](std::string dir)
         {
             struct dirent *entry;
             DIR *dp;
@@ -76,26 +75,21 @@ namespace mvcpp{
             }
             while((entry = readdir(dp)))
             {
-                struct stat s;
                 std::string file = dir + "/" + std::string(entry->d_name);
-                if(stat(file.c_str(), &s) == 0)
+
+                if(!(entry->d_type & DT_DIR))
                 {
-                    if(s.st_mode & S_IFREG)
+                    // Regular file, whoop whoop
+                    load_static(file);
+                    std::cout << "static: " << file << std::endl;
+                }
+                else
+                {
+                    // Directory
+                    if(entry->d_name[0] != '.') // Don't do hidden files and .. and .
                     {
-                        // Regular file, whoop whoop
-                        load_static(file);
-                        std::cout << "static: " << file << std::endl;
-                    }
-                    else if (s.st_mode & S_IFDIR)
-                    {
-                        // Directory
-                        std::string subdir;
-                        if((subdir = std::string(entry->d_name))[0] != '.') // Don't do hidden files and .. and .
-                        {
-                            dir = file;
-                            std::cout << "Recursing " << dir << std::endl;
-                            scan_dir(dir);
-                        }
+                        std::cout << "Recursing " << file << std::endl;
+                        scan_dir(file);
                     }
                 }
             }
@@ -118,31 +112,26 @@ namespace mvcpp{
             }
             while((entry = readdir(dp)))
             {
-                struct stat s;
                 std::string file = dir + "/" + std::string(entry->d_name);
-                if(stat(file.c_str(), &s) == 0)
+
+                if(!(entry->d_type & DT_DIR))
                 {
-                    if(s.st_mode & S_IFREG)
+                    // Regular file, whoop whoop
+                    // Check whether the file ends in .html.view
+                    if(file.substr(file.length() - 10, 10) == ".html.view")
                     {
-                        // Regular file, whoop whoop
-                        // Check whether the file ends in .html.view
-                        if(file.substr(file.length() - 10, 10) == ".html.view")
-                        {
-                            load_view(file);
-                        }
-                        else
-                            std::cout << "Strange file: " << file << std::endl;
+                        load_view(file);
                     }
-                    else if (s.st_mode & S_IFDIR)
+                    else
+                        std::cout << "Strange file: " << file << std::endl;
+                }
+                else
+                {
+                    // Directory
+                    if(std::string(entry->d_name)[0] != '.') // Don't do hidden files and .. and .
                     {
-                        // Directory
-                        std::string subdir;
-                        if((subdir = std::string(entry->d_name))[0] != '.') // Don't do hidden files and .. and .
-                        {
-                            dir = file;
-                            std::cout << "Recursing " << dir << std::endl;
-                            scan_dir(dir);
-                        }
+                        std::cout << "Recursing " << file << std::endl;
+                        scan_dir(file);
                     }
                 }
             }
