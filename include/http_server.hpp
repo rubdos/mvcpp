@@ -29,6 +29,7 @@ namespace mvcpp{
         http_server(const unsigned short port = 80);
 
         void join();
+        void stop();
 
         void set_handler(std::function<int (const std::string path, const std::string method, const std::vector<std::string> headers, std::string& response)> handler){this->_request_handler = handler;}
 

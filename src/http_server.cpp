@@ -29,6 +29,7 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include <errno.h>
 
 #include "http_server.hpp"
   
@@ -44,7 +45,11 @@ namespace mvcpp{
     {
         int error;
         char buff[16*1024]; // Accept a maximum of 16K of header data
-        std::string headers;
+        std::string headers, data;
+
+        time_t request_time = time(NULL);
+
+        float transferrate = 100;
 
         while(headers.size() < 4 
                 or 
@@ -58,6 +63,29 @@ namespace mvcpp{
                 return;
             }
             headers += std::string(buff, error);
+
+            transferrate = (float) (headers.size())/(float)(time(NULL) - request_time);
+            size_t hep;
+            if((hep = headers.find("\r\n\r\n")) != headers.npos)
+            {
+                // Some data came through after the endlines
+                data = headers.substr(hep + 4);
+                headers = headers.substr(0, hep);
+                break;
+            }
+            if(request_time > 100) // TODO: check for a file post.
+            {
+                std::string response("HTTP/0.9 408 request timed out. Try again.\r\n\r\n");
+                send(socket, response.c_str(), response.size(), 0);
+                close(socket);
+                return;
+            }
+            if(error == 0)
+            {
+                // Sleep for the time needed to get 100 bytes
+                std::this_thread::sleep_for(std::chrono::milliseconds((int64_t)(100 * transferrate)));
+                std::cout << "Sleeping for this slower client" << std::endl;
+            }
         }
 
         std::vector<std::string> header_lines;
@@ -165,9 +193,28 @@ namespace mvcpp{
             socklen_t addrLen = sizeof(sourceAddr);
             int client_socket = accept(_socket, 
                     (sockaddr*) &sourceAddr, &addrLen);
+            if(client_socket < 0)
+            {
+                if(errno == ECONNABORTED 
+                        or errno == EBADF 
+                        or errno == EINVAL)
+                {
+                    close(_socket);
+                    break;
+                }
+                else
+                {
+                    std::cout << "Error " << errno << std::endl;
+                }
+            }
             std::thread handler(&http_server::_handle_request, this, client_socket, sourceAddr, addrLen);
             handler.detach();
         }
+    }
+
+    void http_server::stop()
+    {
+        shutdown(_socket, 2);
     }
 
     void http_server::join()

@@ -27,7 +27,7 @@ namespace mvcpp{
         application(unsigned short port = 80);
 
         void join();
-
+        void stop(){_http_server.stop();};
 
     protected:
         template <class T>
