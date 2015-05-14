@@ -55,7 +55,7 @@ namespace mvcpp{
             if(error < 0)
             {
                 close(socket);
-                continue;
+                return;
             }
             headers += std::string(buff, error);
         }

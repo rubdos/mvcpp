@@ -39,7 +39,7 @@ namespace mvcpp{
                     ctx->response_header("Content-Type", "text/plain");
                     std::map<std::string, std::string> mimetypes;
                     mimetypes["css"] = "text/css";
-                    mimetypes["js"] = "text/js";
+                    mimetypes["js"] = "application/javascript";
                     mimetypes["jpg"] = "image/jpeg";
                     mimetypes["jpeg"] = "image/jpeg";
                     mimetypes["png"] = "image/png";
