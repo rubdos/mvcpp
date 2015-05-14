@@ -39,6 +39,8 @@ namespace mvcpp{
 
         void load_view(std::string path);
         void load_static(std::string path);
+
+        virtual void initialize_default_template(std::shared_ptr<context>) {}
     private:
 
         void index_views();
