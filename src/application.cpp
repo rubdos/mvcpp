@@ -63,10 +63,10 @@ namespace mvcpp{
     }
     void application::index_static()
     {
-        struct dirent *entry;
-        DIR *dp;
         std::function<void (std::string)> scan_dir = [&](std::string dir)
         {
+            struct dirent *entry;
+            DIR *dp;
             dp = opendir(dir.c_str());
             if(dp == NULL)
             {
@@ -105,10 +105,10 @@ namespace mvcpp{
     }
     void application::index_views()
     {
-        struct dirent *entry;
-        DIR *dp;
         std::function<void (std::string)> scan_dir = [&](std::string dir)
         {
+            struct dirent *entry;
+            DIR *dp;
             dp = opendir(dir.c_str());
             if(dp == NULL)
             {
