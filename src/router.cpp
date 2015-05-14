@@ -36,6 +36,15 @@ namespace mvcpp{
             {
                 return [&](std::shared_ptr<context> ctx){
                     ctx->render(view("static" + path));
+                    ctx->response_header("Content-Type", "text/plain");
+                    if(path.substr(path.length() - 3, 3) == "css")
+                    {
+                        ctx->response_header("Content-Type", "text/css");
+                    }
+                    else if(path.substr(path.length() - 2, 2) == "js")
+                    {
+                        ctx->response_header("Content-Type", "text/javascript");
+                    }
                 };
             }
             return [&](std::shared_ptr<context> ctx){

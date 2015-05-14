@@ -48,6 +48,11 @@ namespace mvcpp{
 
         void set_template(view v);
         view& get_template();
+
+        void response_header(std::string key, std::string value)
+        {
+            _response_headers[key] = value;
+        }
     private:
         const std::string _path;
         const std::string _method;
