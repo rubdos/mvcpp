@@ -25,11 +25,13 @@
 
 namespace mvcpp{
     application::application(unsigned short port)
-        : _http_server(port)
+        : _http_server(port),
+          _router(_statics)
     {
         using namespace std::placeholders;
         _http_server.set_handler(std::bind(&application::_handle_request, this, _1, _2, _3, _4));
         index_views();
+        index_static();
     }
     int application::_handle_request(const std::string path, 
                 const std::string method, 
@@ -54,6 +56,52 @@ namespace mvcpp{
     {
         _views[filepath.substr(6, filepath.length()-6-10)] = filepath; // Strip file extension
         std::cout << filepath.substr(6, filepath.length()-6-10) << " -> " << filepath << std::endl;
+    }
+    void application::load_static(std::string filepath)
+    {
+        _statics.push_back(filepath);
+    }
+    void application::index_static()
+    {
+        struct dirent *entry;
+        DIR *dp;
+        std::function<void (std::string)> scan_dir = [&](std::string dir)
+        {
+            dp = opendir(dir.c_str());
+            if(dp == NULL)
+            {
+                std::cerr << "Cannot open static directory;"
+                    " no views will be available for this application" << std::endl;
+                return;
+            }
+            while((entry = readdir(dp)))
+            {
+                struct stat s;
+                std::string file = dir + "/" + std::string(entry->d_name);
+                if(stat(file.c_str(), &s) == 0)
+                {
+                    if(s.st_mode & S_IFREG)
+                    {
+                        // Regular file, whoop whoop
+                        load_static(file);
+                        std::cout << "static: " << file << std::endl;
+                    }
+                    else if (s.st_mode & S_IFDIR)
+                    {
+                        // Directory
+                        std::string subdir;
+                        if((subdir = std::string(entry->d_name))[0] != '.') // Don't do hidden files and .. and .
+                        {
+                            dir = file;
+                            std::cout << "Recursing " << dir << std::endl;
+                            return scan_dir(dir);
+                        }
+                    }
+                }
+            }
+            closedir(dp);
+        };
+        scan_dir("static");
     }
     void application::index_views()
     {

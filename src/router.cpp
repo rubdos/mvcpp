@@ -15,6 +15,10 @@
   *  If not, see <http://www.gnu.org/licenses/>.
   */
   
+#include <sys/stat.h>
+#include <algorithm>
+#include <iostream>
+
 #include "router.hpp"
 #include "context.hpp"
 
@@ -27,6 +31,13 @@ namespace mvcpp{
         }
         catch(std::out_of_range& e)
         {
+            // Perhaps a static?
+            if(std::find(_statics.begin(), _statics.end(), "static" + path) != _statics.end())
+            {
+                return [&](std::shared_ptr<context> ctx){
+                    ctx->render(view("static" + path));
+                };
+            }
             return [&](std::shared_ptr<context> ctx){
                 ctx->set_response_code(404);
                 ctx->render("<h1>404: Page not found</h1><p>The path you requested, <tt>" 

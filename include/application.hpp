@@ -28,9 +28,6 @@ namespace mvcpp{
 
         void join();
 
-        void index_views();
-        void load_view(std::string path);
-
 
     protected:
         template <class T>
@@ -40,7 +37,14 @@ namespace mvcpp{
         }
         void set_default_template(std::string name){_default_template = name;}
 
+        void load_view(std::string path);
+        void load_static(std::string path);
     private:
+
+        void index_views();
+
+        void index_static();
+
         int _handle_request(const std::string path, 
                 const std::string method, 
                 const std::vector<std::string> headers, 
@@ -48,6 +52,7 @@ namespace mvcpp{
         http_server _http_server;
         router _router;
         std::map<std::string /*view*/, std::string /*viewpath*/> _views;
+        std::vector<std::string /* static path */> _statics;
 
         std::string _default_template;
     };

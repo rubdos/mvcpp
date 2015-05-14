@@ -20,6 +20,7 @@
 #include <map>
 #include <functional>
 #include <memory>
+#include <vector>
 
 namespace mvcpp{
     class context;
@@ -27,6 +28,7 @@ namespace mvcpp{
     class router
     {
     public:
+        router(std::vector<std::string>& statics) : _statics(statics) {}
         controller_method operator() (const std::string& path);
         void operator() (const std::string& path, controller_method m)
         {
@@ -50,5 +52,6 @@ namespace mvcpp{
         std::map<std::string /* method */,
             std::map<std::string /* pattern */, 
             controller_method>> _routes;
+        std::vector<std::string> & _statics;
     };
 }
