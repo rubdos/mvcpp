@@ -19,7 +19,13 @@ find_package(Threads REQUIRED)
 set(LINK_LIBS
     ${CMAKE_THREAD_LIBS_INIT})
 
+set(MVCPP_INCLUDE_DIRS 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include 
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/libsqlitepp 
+    PARENT_SCOPE)
+
 include_directories(include)
+include_directories(modules/libsqlitepp)
 
 add_subdirectory(src)
 add_subdirectory(tests)
