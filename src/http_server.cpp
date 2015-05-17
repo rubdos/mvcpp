@@ -73,7 +73,7 @@ namespace mvcpp{
                 headers = headers.substr(0, hep);
                 break;
             }
-            if(request_time > 100) // TODO: check for a file post.
+            if((time(NULL) - request_time) > 100) // TODO: check for a file post.
             {
                 std::string response("HTTP/0.9 408 request timed out. Try again.\r\n\r\n");
                 send(socket, response.c_str(), response.size(), 0);
