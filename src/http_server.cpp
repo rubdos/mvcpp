@@ -34,6 +34,76 @@
 #include "http_server.hpp"
   
 namespace mvcpp{
+    const char HEX2DEC[256] = 
+    {
+        /*       0  1  2  3   4  5  6  7   8  9  A  B   C  D  E  F */
+        /* 0 */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* 1 */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* 2 */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* 3 */  0, 1, 2, 3,  4, 5, 6, 7,  8, 9,-1,-1, -1,-1,-1,-1,
+
+        /* 4 */ -1,10,11,12, 13,14,15,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* 5 */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* 6 */ -1,10,11,12, 13,14,15,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* 7 */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+
+        /* 8 */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* 9 */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* A */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* B */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+
+        /* C */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* D */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* E */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1,
+        /* F */ -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1, -1,-1,-1,-1
+    };
+    // Source: http://www.codeguru.com/cpp/cpp/algorithms/strings/article.php/c12759/URI-Encoding-and-Decoding.htm
+    std::string UriDecode(const std::string & sSrc)
+    {
+       // Note from RFC1630: "Sequences which start with a percent
+       // sign but are not followed by two hexadecimal characters
+       // (0-9, A-F) are reserved for future extension"
+     
+       const unsigned char * pSrc = (const unsigned char *)sSrc.c_str();
+       const int SRC_LEN = sSrc.length();
+       const unsigned char * const SRC_END = pSrc + SRC_LEN;
+       // last decodable '%' 
+       const unsigned char * const SRC_LAST_DEC = SRC_END - 2;
+     
+       char * const pStart = new char[SRC_LEN];
+       char * pEnd = pStart;
+     
+       while (pSrc < SRC_LAST_DEC)
+       {
+          if (*pSrc == '%')
+          {
+             char dec1, dec2;
+             if (-1 != (dec1 = HEX2DEC[*(pSrc + 1)])
+                && -1 != (dec2 = HEX2DEC[*(pSrc + 2)]))
+             {
+                *pEnd++ = (dec1 << 4) + dec2;
+                pSrc += 3;
+                continue;
+             }
+          }
+          else if(*pSrc == '+')
+          {
+              *pEnd++=' ';
+              pSrc++;
+          }
+     
+          *pEnd++ = *pSrc++;
+       }
+     
+       // the last 2- chars
+       while (pSrc < SRC_END)
+          *pEnd++ = *pSrc++;
+     
+       std::string sResult(pStart, pEnd);
+       delete [] pStart;
+       return sResult;
+    }
+
     http_server::http_server(unsigned short port)
         : _port(port), 
           _listener_thread(&http_server::_listen, this)
@@ -84,7 +154,7 @@ namespace mvcpp{
             {
                 // Sleep for the time needed to get 100 bytes
                 std::this_thread::sleep_for(std::chrono::milliseconds((int64_t)(100 * transferrate)));
-                std::cout << "Sleeping for this slower client" << std::endl;
+                //std::cout << "Sleeping for this slower client" << std::endl;
             }
         }
 
@@ -100,8 +170,8 @@ namespace mvcpp{
         std::string requestline = header_lines[0];
         header_lines.erase(header_lines.begin());
 
-        std::cout << "Request: " << std::endl << headers;
-        std::cout << requestline << std::endl;
+        //std::cout << "Request: " << std::endl << headers;
+        //std::cout << requestline << std::endl;
 
         iss.str(requestline);
         iss.clear();
@@ -152,7 +222,29 @@ namespace mvcpp{
             close(socket);
             return;
         }
-        int status = _request_handler(path, method, header_lines, response);
+
+        //Parse data
+        std::map<std::string, std::string> parsed_data;
+        iss.str(data);
+        iss.clear();
+
+        for(std::string token; std::getline(iss, token, '&');)
+        {
+            std::string key;
+            std::string value;
+            size_t posofequals = token.find("=");
+            key = token.substr(0, posofequals);
+            if(posofequals != std::string::npos)
+            {
+                value=token.substr(posofequals + 1);
+            }
+
+            parsed_data[key]=UriDecode(value);
+            std::cout << "k:" << key<< ", v=" << value<<std::endl;
+        }
+
+
+        int status = _request_handler(path, method, header_lines, parsed_data, response);
 
         std::string explanation = "OK"; // TODO
         std::stringstream ss;

@@ -32,8 +32,8 @@ namespace mvcpp{
         std::string& operator[] (const std::string& key);
         view& subview (const std::string& key);
 
-    private:
         std::string render() const;
+    private:
 
         std::map<std::string, std::string> _parameters;
         std::map<std::string, view> _subviews;

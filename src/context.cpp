@@ -23,9 +23,10 @@ namespace mvcpp{
         const std::string& method, 
         const std::vector<std::string>& request_headers, 
         const std::map<std::string, std::string>& views,
+        const std::map<std::string, std::string>& data,
         std::stringstream& response)
         : _path(path), _method(method), _request_headers(request_headers),
-          _views(views), _response_stream(response), 
+          _views(views), _data(data), _response_stream(response), 
           _template(), _response_code(200)
     {
         _response_headers["Content-Type"] = "text/html"; // Default to text/html

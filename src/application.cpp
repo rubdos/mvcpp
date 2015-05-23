@@ -28,19 +28,20 @@ namespace mvcpp{
           _router(_statics)
     {
         using namespace std::placeholders;
-        _http_server.set_handler(std::bind(&application::_handle_request, this, _1, _2, _3, _4));
+        _http_server.set_handler(std::bind(&application::_handle_request, this, _1, _2, _3, _4, _5));
         index_views();
         index_static();
     }
     int application::_handle_request(const std::string path, 
                 const std::string method, 
                 const std::vector<std::string> headers, 
+                const std::map<std::string, std::string> data, 
                 std::string& response)
     {
         auto controller_function = _router.route(method, path);
         std::stringstream resp;
         // Create request context
-        auto rc = std::make_shared<context>(path, method, headers, _views, resp);
+        auto rc = std::make_shared<context>(path, method, headers, _views, data, resp);
 
         rc->set_template(rc->get_view(_default_template));
         initialize_default_template(rc);

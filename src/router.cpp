@@ -25,6 +25,7 @@
 namespace mvcpp{
     controller_method router::route(std::string method, std::string path)
     {
+        std::cout << method << " request received on " << path << std::endl;
         try
         {
             return _routes[method].at(path);
@@ -32,10 +33,11 @@ namespace mvcpp{
         catch(std::out_of_range& e)
         {
             // Perhaps a static?
-            if(std::find(_statics.begin(), _statics.end(), "static" + path) != _statics.end())
+            std::string staticpath = "static" + path;
+            if(std::find(_statics.begin(), _statics.end(), staticpath) != _statics.end())
             {
-                return [&](std::shared_ptr<context> ctx){
-                    ctx->render(view("static" + path));
+                return [staticpath, path](std::shared_ptr<context> ctx){
+                    ctx->render(view(staticpath));
                     ctx->response_header("Content-Type", "text/plain");
                     std::map<std::string, std::string> mimetypes;
                     mimetypes["css"] = "text/css";
@@ -54,6 +56,20 @@ namespace mvcpp{
                     }
                 };
             }
+            // Perhaps a more interesting route?
+            for(auto it: _routes[method])
+            {
+                size_t i = it.first.find(":");
+                if(i == std::string::npos)
+                    continue;
+                if(it.first.substr(0, i) == path.substr(0, i))
+                {
+                    return it.second;
+                }
+            }
+            
+            // Nothing
+            std::cout << "404 on " << path << std::endl;
             return [&](std::shared_ptr<context> ctx){
                 ctx->set_response_code(404);
                 ctx->render("<h1>404: Page not found</h1><p>The path you requested, <tt>" 

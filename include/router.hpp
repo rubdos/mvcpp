@@ -40,6 +40,18 @@ namespace mvcpp{
             using namespace std::placeholders;
             (*this)(path, std::bind(f, T::instance(), _1));
         }
+
+        void post(const std::string& path, controller_method m)
+        {
+            _routes["POST"][path] = m;
+        }
+        template <class T>
+        void post(const std::string& path, void(T::* f) (std::shared_ptr<context>))
+        {
+            using namespace std::placeholders;
+            this->post(path, std::bind(f, T::instance(), _1));
+        }
+
         controller_method route(std::string method, std::string path);
 
         template <class T>

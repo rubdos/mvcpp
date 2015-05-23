@@ -34,6 +34,7 @@ namespace mvcpp{
                 const std::string& method, 
                 const std::vector<std::string>& request_headers, 
                 const std::map<std::string, std::string>& views,
+                const std::map<std::string, std::string>& data,
                 std::stringstream& response
                 );
         void render(const std::string&);
@@ -53,11 +54,22 @@ namespace mvcpp{
         {
             _response_headers[key] = value;
         }
+
+        std::string post_data(std::string key) const
+        {
+            return _data.at(key);
+        }
+
+        std::string get_path() const
+        {
+            return _path;
+        }
     private:
         const std::string _path;
         const std::string _method;
         const std::vector<std::string> _request_headers;
         const std::map<std::string, std::string> _views;
+        const std::map<std::string, std::string> _data;
 
         std::stringstream& _response_stream;
 

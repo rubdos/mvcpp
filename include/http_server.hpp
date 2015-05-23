@@ -17,6 +17,8 @@
   
 #pragma once
 
+#include <map>
+
 #include <thread>
 #include <arpa/inet.h>
 
@@ -31,7 +33,7 @@ namespace mvcpp{
         void join();
         void stop();
 
-        void set_handler(std::function<int (const std::string path, const std::string method, const std::vector<std::string> headers, std::string& response)> handler){this->_request_handler = handler;}
+        void set_handler(std::function<int (const std::string path, const std::string method, const std::vector<std::string> headers, const std::map<std::string, std::string> data, std::string& response)> handler){this->_request_handler = handler;}
 
     private:
         const unsigned short _port;
@@ -45,6 +47,7 @@ namespace mvcpp{
         std::function<int (const std::string path, 
                 const std::string method,
                 const std::vector<std::string> headers, 
+                const std::map<std::string, std::string> data,
                 std::string& response)> _request_handler;
     };
 }
