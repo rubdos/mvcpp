@@ -76,6 +76,13 @@ public:
 };
 
 template<typename T>
+class orm_field<T, long int> : public orm_field_base<T, long int>
+{
+public:
+    static TYPE type_by_template() {return TYPE::integer;}
+};
+
+template<typename T>
 class orm_field<T, unsigned int> : public orm_field_base<T, unsigned int>
 {
 public:
@@ -186,7 +193,7 @@ public:
         std::shared_ptr<T> instance(new T);
         for(auto it = params.begin(); it != params.end(); ++it)
         {
-            switch(T::_fields[it->first]->type)
+            switch(T::_fields.at(it->first)->type)
             {
             case TYPE::string:
                 {
