@@ -38,14 +38,26 @@ private:
         sql << "`" << table << "`"
             << " " << "(";
         values << " (";
+        int i = 1;
         for(auto it = fields.begin(); it != fields.end(); ++it)
         {
             sql << "`" << it->first << "`" << (it+1 == fields.end() ? ")":", ");
-            values << "'" << it->second << "'" << (it+1 == fields.end() ? ")":", ");
+            values << "?" << i << (it+1 == fields.end() ? ")":", ");
+            ++i;
         }
+
         sql << " VALUES " << values.str();
         s->set_sql(sql.str());
-        s->exec();
+
+        s->prepare();
+
+        i = 1;
+        for(auto it = fields.begin(); it != fields.end(); ++it)
+        {
+            s->bind(i, it->second);
+            ++i;
+        }
+        s->step();
         return _db.last_insert_id();
     }
     virtual void update(std::string table, unsigned int id, std::vector<std::pair<std::string, std::string>> fields) override
@@ -93,6 +105,12 @@ private:
             case TYPE::integer:
                 {
                     int data(s->get_int(i));
+                    field_callback(it->key, &data);
+                    break;
+                }
+            case TYPE::linteger:
+                {
+                    long int data(s->get_int(i));
                     field_callback(it->key, &data);
                     break;
                 }

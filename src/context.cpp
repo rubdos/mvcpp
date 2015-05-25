@@ -20,12 +20,13 @@
 namespace mvcpp{
     context::context(
         const std::string& path, 
+        const std::string& param, 
         const std::string& method, 
         const std::vector<std::string>& request_headers, 
         const std::map<std::string, std::string>& views,
         const std::map<std::string, std::string>& data,
         std::stringstream& response)
-        : _path(path), _method(method), _request_headers(request_headers),
+        : _path(path), _param(param), _method(method), _request_headers(request_headers),
           _views(views), _data(data), _response_stream(response), 
           _template(), _response_code(200)
     {

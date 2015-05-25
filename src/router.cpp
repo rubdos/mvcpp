@@ -23,7 +23,7 @@
 #include "context.hpp"
 
 namespace mvcpp{
-    controller_method router::route(std::string method, std::string path)
+    controller_method router::route(const std::string& method, const std::string& path, std::string& parameter)
     {
         std::cout << method << " request received on " << path << std::endl;
         try
@@ -64,6 +64,8 @@ namespace mvcpp{
                     continue;
                 if(it.first.substr(0, i) == path.substr(0, i))
                 {
+                    parameter = path.substr(i);
+                    std::cout << "Path: " << it.first.substr(0, i) << ", param: " << parameter << std::endl;
                     return it.second;
                 }
             }
@@ -80,6 +82,7 @@ namespace mvcpp{
     }
     controller_method router::operator() (const std::string& path)
     {
-        return this->route("GET", path);
+        std::string param;
+        return this->route("GET", path, param);
     }
 }

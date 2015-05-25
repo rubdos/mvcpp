@@ -239,7 +239,7 @@ namespace mvcpp{
                 value=token.substr(posofequals + 1);
             }
 
-            parsed_data[key]=UriDecode(value);
+            parsed_data[key] = (value = UriDecode(value));
             std::cout << "k:" << key<< ", v=" << value<<std::endl;
         }
 

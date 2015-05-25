@@ -52,7 +52,7 @@ namespace mvcpp{
             this->post(path, std::bind(f, T::instance(), _1));
         }
 
-        controller_method route(std::string method, std::string path);
+        controller_method route(const std::string& method, const std::string& path, std::string& parameter);
 
         template <class T>
         void register_controller()

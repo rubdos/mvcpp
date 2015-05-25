@@ -38,10 +38,11 @@ namespace mvcpp{
                 const std::map<std::string, std::string> data, 
                 std::string& response)
     {
-        auto controller_function = _router.route(method, path);
+        std::string param;
+        auto controller_function = _router.route(method, path, param);
         std::stringstream resp;
         // Create request context
-        auto rc = std::make_shared<context>(path, method, headers, _views, data, resp);
+        auto rc = std::make_shared<context>(path, param, method, headers, _views, data, resp);
 
         rc->set_template(rc->get_view(_default_template));
         initialize_default_template(rc);

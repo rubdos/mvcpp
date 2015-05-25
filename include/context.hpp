@@ -31,6 +31,7 @@ namespace mvcpp{
         typedef std::shared_ptr<context> ptr;
         context(
                 const std::string& path, 
+                const std::string& param,
                 const std::string& method, 
                 const std::vector<std::string>& request_headers, 
                 const std::map<std::string, std::string>& views,
@@ -55,6 +56,11 @@ namespace mvcpp{
             _response_headers[key] = value;
         }
 
+        std::string get_parameter()
+        {
+            return _param;
+        }
+
         std::string post_data(std::string key) const
         {
             return _data.at(key);
@@ -66,6 +72,7 @@ namespace mvcpp{
         }
     private:
         const std::string _path;
+        const std::string _param;
         const std::string _method;
         const std::vector<std::string> _request_headers;
         const std::map<std::string, std::string> _views;

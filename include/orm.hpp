@@ -15,7 +15,7 @@
 #define ORM_OBJECT(NAME) friend class orm_object< NAME >; \
         public: static std::string get_object_name() {return #NAME ;}\
         protected: NAME (unsigned int id) : orm_object(id){this->_load(id);}; private:\
-        NAME () : orm_object< NAME >(){}
+        NAME () : orm_object< NAME >(){this->init();}
 
 #define HAS_ONE_THROUGH(TYPE, THROUGH) public: std::shared_ptr<TYPE> get_ ## THROUGH (){return TYPE::get(_ ## THROUGH ## _id);};\
     private: unsigned int _ ## THROUGH ## _id;
@@ -25,7 +25,7 @@
 
 namespace mvcpp {
 
-enum class TYPE {string, integer, uinteger, primary};
+enum class TYPE {string, integer, linteger, uinteger, primary};
 
 template<typename T>
 class _orm_field
@@ -79,7 +79,7 @@ template<typename T>
 class orm_field<T, long int> : public orm_field_base<T, long int>
 {
 public:
-    static TYPE type_by_template() {return TYPE::integer;}
+    static TYPE type_by_template() {return TYPE::linteger;}
 };
 
 template<typename T>
@@ -132,6 +132,7 @@ public:
             return "TEXT";
             break;
         case TYPE::integer:
+        case TYPE::linteger:
             return "INTEGER";
             break;
         case TYPE::uinteger:
@@ -166,6 +167,9 @@ public:
     {
         orm_object<T>::_register_fields();
     };
+    virtual void init()
+    {
+    }
     static std::shared_ptr<T> get(unsigned int id)
     {
         std::shared_ptr<T> res(_cache[id].lock());
@@ -201,7 +205,8 @@ public:
         }
         return objects;
     }
-    static std::shared_ptr<T> factory(bool save, std::map<std::string, const void*> params) throw(std::out_of_range)
+    static std::shared_ptr<T> factory(bool save = false, 
+            std::map<std::string, const void*> params = {}) throw(std::out_of_range)
     {
         orm_object<T>::_register_fields();
         std::shared_ptr<T> instance(new T);
@@ -296,9 +301,14 @@ public:
         return id();
     }
     template<typename R>
-    R value (const std::string field_name)
+    R value (const std::string& field_name)
     {
         return ((orm_field_base<T, R>*)orm_object<T>::_fields.at(field_name))->read((T*)this);
+    }
+    template<typename R>
+    void value (const std::string& field_name, const R value)
+    {
+        return ((orm_field_base<T, R>*)orm_object<T>::_fields.at(field_name))->write((T*)this, (void*)&value);
     }
 protected:
     unsigned int _id;
@@ -319,7 +329,7 @@ protected:
         }
         database::current_database->fetch(def, id, [&](std::string field, void* data)
                 {
-                // Ugly for loop. Use the std::map
+                    // Ugly for loop. Use the std::map
                     for(auto it = T::_fields.begin(); it != T::_fields.end(); ++it)
                     {
                         if(database::safe_field_name(it->first) == field)
