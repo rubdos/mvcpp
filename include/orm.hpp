@@ -171,8 +171,15 @@ public:
         std::shared_ptr<T> res(_cache[id].lock());
         if(!res)
         {
-            res = std::shared_ptr<T>(new T(id));
-            _cache[id] = res;
+            try 
+            {
+                res = std::shared_ptr<T>(new T(id));
+                _cache[id] = res;
+            }
+            catch(mvcpp::database::not_found_exception& e)
+            {
+                return nullptr;
+            }
         }
         return res;
     }
@@ -182,12 +189,19 @@ public:
         auto ids = database::current_database->fetch_all(database::safe_field_name(T::get_object_name()));
         for(auto it : ids)
         {
-            auto o = T::get(it);
-            objects.push_back(o);
+            try
+            {
+                auto o = T::get(it);
+                objects.push_back(o);
+            }
+            catch (mvcpp::database::not_found_exception& e)
+            {
+                std::cout << T::get_object_name() << " ID " << it << " not found." << std::endl;
+            }
         }
         return objects;
     }
-    static std::shared_ptr<T> factory(bool save, std::map<std::string, const void*> params)
+    static std::shared_ptr<T> factory(bool save, std::map<std::string, const void*> params) throw(std::out_of_range)
     {
         orm_object<T>::_register_fields();
         std::shared_ptr<T> instance(new T);
@@ -243,6 +257,17 @@ public:
         }
         database::current_database->create_table(def);
     };
+    virtual std::string to_json()
+    {
+        std::string json = "{\n";
+        for(auto it = T::_fields.begin(); it != T::_fields.end(); ++it)
+        {
+            json += "\t\"" + database::safe_field_name(it->first) + "\": \"" + it->second->to_string((T*)this) + "\",\n"; 
+        }
+        json = json.substr(0, json.length()-2); // Strip the ,
+        json += "\n}";
+        return json;
+    }
     virtual void save()
     {
         if(!_fields_registered.exchange(true))
